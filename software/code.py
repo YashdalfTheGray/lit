@@ -2,9 +2,18 @@
 import time
 import board
 import neopixel
+import digitalio
 
 pixels = neopixel.NeoPixel(
     board.NEOPIXEL, 10, brightness=0.3, auto_write=False)
+
+button_a = digitalio.DigitalInOut(board.BUTTON_A)
+button_a.direction = digitalio.Direction.INPUT
+button_a.pull = digitalio.Pull.DOWN
+
+button_b = digitalio.DigitalInOut(board.BUTTON_B)
+button_b.direction = digitalio.Direction.INPUT
+button_b.pull = digitalio.Pull.DOWN
 
 
 def color_wheel(pos):
@@ -45,23 +54,33 @@ CYAN = (0, 255, 255)
 BLUE = (0, 0, 255)
 PURPLE = (180, 0, 255)
 
+show_leds = False
+
 while True:
-    pixels.fill(RED)
-    pixels.show()
-    # Increase or decrease to change the speed of the solid color change.
-    time.sleep(1)
-    pixels.fill(GREEN)
-    pixels.show()
-    time.sleep(1)
-    pixels.fill(BLUE)
-    pixels.show()
-    time.sleep(1)
+    if button_a.value:
+        show_leds = True
 
-    color_chase(RED, 0.1)  # Increase the number to slow down the color chase
-    color_chase(YELLOW, 0.1)
-    color_chase(GREEN, 0.1)
-    color_chase(CYAN, 0.1)
-    color_chase(BLUE, 0.1)
-    color_chase(PURPLE, 0.1)
+    if button_b.value:
+        show_leds = False
 
-    rainbow_cycle(0)  # Increase the number to slow down the rainbow
+    if show_leds:
+        pixels.fill(RED)
+        pixels.show()
+        # Increase or decrease to change the speed of the solid color change.
+        time.sleep(1)
+        pixels.fill(GREEN)
+        pixels.show()
+        time.sleep(1)
+        pixels.fill(BLUE)
+        pixels.show()
+        time.sleep(1)
+
+        # Increase the number to slow down the color chase
+        color_chase(RED, 0.1)
+        color_chase(YELLOW, 0.1)
+        color_chase(GREEN, 0.1)
+        color_chase(CYAN, 0.1)
+        color_chase(BLUE, 0.1)
+        color_chase(PURPLE, 0.1)
+
+        rainbow_cycle(0)  # Increase the number to slow down the rainbow
