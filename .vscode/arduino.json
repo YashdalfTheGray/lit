@@ -1,0 +1,5 @@
+{
+    "sketch": "software/init.ino",
+    "board": "arduino:samd:adafruit_circuitplayground_m0",
+    "port": "/dev/tty.usbmodem101"
+}
