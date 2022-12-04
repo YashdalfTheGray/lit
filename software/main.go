@@ -1,52 +1,34 @@
 package main
 
 import (
-	"encoding/json"
-	"flag"
-	"fmt"
 	"net/http"
-	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-type Status struct {
-	Status    string `json:"status"`
-	Connected string `json:"connected"`
+type ServerStatus struct {
+	Status          string `json:"status"`
+	RemoteConnected bool   `json:"remoteConnected"`
 }
 
 func main() {
-	var bindAddr string
+	// Echo instance
+	e := echo.New()
 
-	flag.StringVar(&bindAddr, "bind-address", "localhost", "the address to bind the ports to")
-	flag.Parse()
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	statusServeMux := http.NewServeMux()
-	statusServeMux.HandleFunc("/", statusHandler)
-	wrappedStatusHandler := logRequestHandlerWrapper(statusServeMux)
-	fmt.Println("Started status server")
-	http.ListenAndServe(fmt.Sprintf("%s:8080", bindAddr), wrappedStatusHandler)
-}
+	// Route => handler
+	e.GET("/", func(c echo.Context) error {
+		s := &ServerStatus{
+			Status:          "okay",
+			RemoteConnected: true,
+		}
+		return c.JSON(http.StatusOK, s)
+	})
 
-func logRequestHandlerWrapper(h http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		h.ServeHTTP(w, r)
-		fmt.Println(generateLogLine(r.URL.String(), r.Method, r.Proto, r.RemoteAddr))
-	}
-
-	return http.HandlerFunc(fn)
-}
-
-func statusHandler(w http.ResponseWriter, r *http.Request) {
-	status := Status{
-		Status:    "okay",
-		Connected: "maybe",
-	}
-	if err := json.NewEncoder(w).Encode(status); err == nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
-func generateLogLine(uri, method, protocol, remote string) string {
-	return fmt.Sprintf("[%s] \"%s %s %s\" %s", time.Now().UTC(), method, uri, protocol, remote)
+	// Start server
+	e.Logger.Fatal(e.Start(":1323"))
 }
