@@ -23,6 +23,7 @@ func main() {
 
 	// static files
 	e.File("/", "static/index.html")
+	e.File("/favicon.ico", "static/assets/favicon.ico")
 
 	e.GET("/status", func(c echo.Context) error {
 		s := &ServerStatus{
