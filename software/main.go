@@ -13,17 +13,18 @@ type ServerStatus struct {
 }
 
 func main() {
-	// Echo instance
 	e := echo.New()
 
-	// Middleware
+	// global middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Use(middleware.CSRF())
 
-	// Route => handler
-	e.GET("/", func(c echo.Context) error {
+	// static files
+	e.File("/", "static/index.html")
+
+	e.GET("/status", func(c echo.Context) error {
 		s := &ServerStatus{
 			Status:          "okay",
 			RemoteConnected: true,
