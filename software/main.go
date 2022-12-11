@@ -5,11 +5,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-type ServerStatus struct {
-	Status          string `json:"status"`
-	RemoteConnected bool   `json:"remoteConnected"`
-}
-
 func main() {
 	e := echo.New()
 
