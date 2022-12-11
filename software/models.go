@@ -21,3 +21,9 @@ type ServerStatus struct {
 	Status          string `json:"status"`
 	RemoteConnected bool   `json:"remoteConnected"`
 }
+
+// Errors
+
+type ErrorResponse struct {
+	Reason string `json:"reason"`
+}
