@@ -7,7 +7,7 @@ import (
 )
 
 func StatusHandler(c echo.Context) error {
-	s := &ServerStatus{
+	s := &ServerStatusResponse{
 		Status:          "okay",
 		RemoteConnected: true,
 	}
@@ -18,12 +18,13 @@ func PutPatternHandler(c echo.Context) error {
 	foundRequest := PutPatternRequest{}
 	err := c.Bind(&foundRequest)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorResponse{
+		errResponse := &ErrorResponse{
 			Reason: "bad request",
-		})
+		}
+		return c.JSON(http.StatusBadRequest, errResponse)
 	}
 
-	s := &ServerStatus{
+	s := &ServerStatusResponse{
 		Status:          "okay",
 		RemoteConnected: true,
 	}

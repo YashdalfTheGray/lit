@@ -17,7 +17,7 @@ type PutPatternRequest struct {
 
 // Responses
 
-type ServerStatus struct {
+type ServerStatusResponse struct {
 	Status          string `json:"status"`
 	RemoteConnected bool   `json:"remoteConnected"`
 }
