@@ -1,3 +1,7 @@
+### Project specific
+
+firmware/lib
+
 # File created using '.gitignore Generator' for Visual Studio Code: https://bit.ly/vscode-gig
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,circuitpython,go,linux,vim,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,macos,circuitpython,go,linux,vim,windows

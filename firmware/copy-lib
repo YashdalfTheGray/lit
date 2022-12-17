@@ -18,6 +18,7 @@ Options:
   - -s --stage\t\tcopy the desired libraries to the project folder
   - -d --deploy\t\tcopy the desired libraries to the CIRCUITPY volume
   - -f, --from-location\tthe location of the downloaded Adafruit libraries bundle
+  - -t, --to-location\tthe location to copy to, ignored if --stage is not passed in, ./lib by default
   - -l, --library-list\ta JSON file containing a list of desired libraries
 
 To copy into the `lib` directory of the current directory, use `--stage` or `-s`.
@@ -38,12 +39,13 @@ def load_json_list(path):
 def main(argv):
     from_location = ""
     selected_libraries = ""
+    to_location = "./lib"
     mode = Mode.STAGE
 
     try:
         opts, args = getopt.getopt(
-            argv, "hsdf:l:", [
-                "help", "stage", "deploy", "from-location=", "library-list="
+            argv, "hsdf:t:l:", [
+                "help", "stage", "deploy", "from-location=", "to-location=", "library-list="
             ]
         )
     except getopt.GetoptError:
@@ -58,11 +60,13 @@ def main(argv):
             from_location = arg
         elif opt in ("-l", "--library-list"):
             selected_libraries = arg
+        elif opt in ("-t", "--to-location"):
+            to_location = arg
         elif opt in ("-d", "--deploy"):
             mode = Mode.DEPLOY
 
     libraries_list = load_json_list(selected_libraries)
-    destination_path_root = "/Volumes/CIRCUITPY/lib" if mode == Mode.DEPLOY else "./lib"
+    destination_path_root = "/Volumes/CIRCUITPY/lib" if mode == Mode.DEPLOY else to_location
 
     if mode == Mode.DEPLOY and not os.path.isdir(destination_path_root):
         sys.exit("The volume CIRCUITPY wasn't found, can't copy libraries to board.")
