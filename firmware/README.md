@@ -19,3 +19,7 @@ CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 - https://learn.adafruit.com/adafruit-circuit-playground-express
 - https://learn.adafruit.com/sipping-power-with-neopixels
 - https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels
+- https://www.adafruit.com/product/4650
+- https://www.adafruit.com/product/3650
+- https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout
+- https://learn.adafruit.com/adafruit-128x64-oled-featherwing
