@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+
+# For now, only works on macOS because paths are linux based
+# and mount paths are hardcoded to macOS
+
+import sys
+import getopt
+import json
+import shutil
+import os
+
+from enum import Enum
+
+help_message = """
+copy-lib <mode> -f <location_of_adafruit_libraries> -l <json_list_of_libraries>
+
+Options:
+  - -s --stage\t\tcopy the desired libraries to the project folder
+  - -d --deploy\t\tcopy the desired libraries to the CIRCUITPY volume
+  - -f, --from-location\tthe location of the downloaded Adafruit libraries bundle
+  - -l, --library-list\ta JSON file containing a list of desired libraries
+
+To copy into the `lib` directory of the current directory, use `--stage` or `-s`.
+To copy into the `lib` directory of the CIRCUITPY volume, use `--deploy` or `-d`.
+"""
+
+
+class Mode(Enum):
+    STAGE = 1
+    DEPLOY = 2
+
+
+def load_json_list(path):
+    with open(path) as json_file:
+        return json.load(json_file)
+
+
+def main(argv):
+    from_location = ""
+    selected_libraries = ""
+    mode = Mode.STAGE
+
+    try:
+        opts, args = getopt.getopt(
+            argv, "hsdf:l:", [
+                "help", "stage", "deploy", "from-location=", "library-list="
+            ]
+        )
+    except getopt.GetoptError:
+        print("copy-lib -s -f <location_of_adafruit_bundle> -l <json_list_of_libraries>")
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            print(help_message)
+            sys.exit()
+        elif opt in ("-f", "--from-location"):
+            from_location = arg
+        elif opt in ("-l", "--library-list"):
+            selected_libraries = arg
+        elif opt in ("-d", "--deploy"):
+            mode = Mode.DEPLOY
+
+    libraries_list = load_json_list(selected_libraries)
+    destination_path_root = "/Volumes/CIRCUITPY/lib" if mode == Mode.DEPLOY else "./lib"
+
+    if mode == Mode.DEPLOY and not os.path.isdir(destination_path_root):
+        sys.exit("The volume CIRCUITPY wasn't found, can't copy libraries to board.")
+
+    shutil.rmtree(destination_path_root, ignore_errors=True)
+    os.mkdir(destination_path_root)
+
+    for library in libraries_list:
+        library_path = f"{from_location}/lib/{library}"
+        destination_path = f"{destination_path_root}/{library}/"
+
+        if os.path.isdir(library_path):
+            shutil.copytree(library_path, destination_path)
+        elif os.path.isfile(library_path):
+            shutil.copy(library_path, f"{destination_path_root}/")
+        else:
+            print(f"Path {library_path} is neither a file nor a directory.")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
