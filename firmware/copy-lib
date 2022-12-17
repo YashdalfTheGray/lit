@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
-# For now, only works on macOS because paths are linux based
-# and mount paths are hardcoded to macOS
-
 import sys
 import getopt
 import json
 import shutil
 import os
+
+from zipfile import ZipFile, ZipInfo
 
 from enum import Enum
 
@@ -17,12 +16,16 @@ copy-lib <mode> -f <location_of_adafruit_libraries> -l <json_list_of_libraries>
 Options:
   - -s --stage\t\tcopy the desired libraries to the project folder
   - -d --deploy\t\tcopy the desired libraries to the CIRCUITPY volume
-  - -f, --from-location\tthe location of the downloaded Adafruit libraries bundle
-  - -t, --to-location\tthe location to copy to, ignored if --stage is not passed in, ./lib by default
+  - -a, --archive\tthe location of the downloaded Adafruit libraries bundle zip file
+  - -t, --to-location\tthe location to copy to, current directory in stage mode, /Volumes/CIRCUITPY in deploy mode
   - -l, --library-list\ta JSON file containing a list of desired libraries
 
 To copy into the `lib` directory of the current directory, use `--stage` or `-s`.
 To copy into the `lib` directory of the CIRCUITPY volume, use `--deploy` or `-d`.
+
+This script will (delete and re) create a folder called 'lib' at the destination.
+The paths default to macOS mount points and linux paths but can be changed with
+the --to-location flag.
 """
 
 
@@ -31,21 +34,54 @@ class Mode(Enum):
     DEPLOY = 2
 
 
-def load_json_list(path):
+def load_json_list(path: str):
     with open(path) as json_file:
         return json.load(json_file)
 
 
+def inner_library_path(path: str):
+    return path.split('/', 1)[1]
+
+
+def determine_to_location(mode: Mode, incoming_location: str) -> str:
+    default_to_location_stage = "."
+    default_to_location_deploy = "/Volumes/CIRCUITPY"
+
+    if (len(incoming_location) > 0):
+        return incoming_location
+    elif (len(incoming_location) == 0 and mode == Mode.DEPLOY):
+        return default_to_location_deploy
+    else:
+        return default_to_location_stage
+
+
+def extract_relevant_zip_infos(libraries_list: list[str], archive_list: list[ZipInfo]) -> list[ZipInfo]:
+    result: list[ZipInfo] = []
+
+    for library in libraries_list:
+        library_path = f"lib/{library}"
+
+        matched_infos = list(filter(
+            lambda zi: library_path in zi.filename, archive_list))
+
+        for zi in matched_infos:
+            zi.filename = inner_library_path(zi.filename)
+            result.append(zi)
+
+    return result
+
+
 def main(argv):
-    from_location = ""
-    selected_libraries = ""
-    to_location = "./lib"
     mode = Mode.STAGE
+
+    archive_path = ""
+    selected_libraries = ""
+    to_location = ""
 
     try:
         opts, args = getopt.getopt(
-            argv, "hsdf:t:l:", [
-                "help", "stage", "deploy", "from-location=", "to-location=", "library-list="
+            argv, "hsda:t:l:", [
+                "help", "stage", "deploy", "archive=", "to-location=", "library-list="
             ]
         )
     except getopt.GetoptError:
@@ -56,8 +92,8 @@ def main(argv):
         if opt in ("-h", "--help"):
             print(help_message)
             sys.exit()
-        elif opt in ("-f", "--from-location"):
-            from_location = arg
+        elif opt in ("-a", "--archive"):
+            archive_path = arg
         elif opt in ("-l", "--library-list"):
             selected_libraries = arg
         elif opt in ("-t", "--to-location"):
@@ -66,24 +102,22 @@ def main(argv):
             mode = Mode.DEPLOY
 
     libraries_list = load_json_list(selected_libraries)
-    destination_path_root = "/Volumes/CIRCUITPY/lib" if mode == Mode.DEPLOY else to_location
+    destination_path_root = determine_to_location(mode, to_location)
 
     if mode == Mode.DEPLOY and not os.path.isdir(destination_path_root):
         sys.exit("The volume CIRCUITPY wasn't found, can't copy libraries to board.")
 
-    shutil.rmtree(destination_path_root, ignore_errors=True)
-    os.mkdir(destination_path_root)
+    shutil.rmtree(f"{destination_path_root}/lib", ignore_errors=True)
+    os.mkdir(f"{destination_path_root}/lib")
 
-    for library in libraries_list:
-        library_path = f"{from_location}/lib/{library}"
-        destination_path = f"{destination_path_root}/{library}/"
+    archive_file = ZipFile(archive_path)
+    archive_info_list = archive_file.infolist()
 
-        if os.path.isdir(library_path):
-            shutil.copytree(library_path, destination_path)
-        elif os.path.isfile(library_path):
-            shutil.copy(library_path, f"{destination_path_root}/")
-        else:
-            print(f"Path {library_path} is neither a file nor a directory.")
+    relevant_infos = extract_relevant_zip_infos(
+        libraries_list, archive_info_list)
+
+    for zi in relevant_infos:
+        archive_file.extract(zi, destination_path_root)
 
 
 if __name__ == "__main__":
