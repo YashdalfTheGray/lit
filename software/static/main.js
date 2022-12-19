@@ -1,7 +1,8 @@
 const root = document.querySelector('div#app-root');
 
-root.innerHTML = bootstrapApp(`It's Lit`);
+root.innerHTML = bootstrapApp({ title: `It's Lit` });
 
-function bootstrapApp(title) {
+function bootstrapApp(props) {
+  const { title } = props;
   return title;
 }

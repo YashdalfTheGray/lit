@@ -21,6 +21,7 @@ func main() {
 	e.File("/main.css", "static/main.css")
 
 	e.GET("/status", StatusHandler)
+	e.PUT("/pattern", PutPatternHandler)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))

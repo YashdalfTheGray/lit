@@ -3,6 +3,7 @@ package main
 type LightModifier string
 
 const (
+	None    LightModifier = "none"
 	Fade    LightModifier = "fade"
 	Twinkle LightModifier = "twinkle"
 )
