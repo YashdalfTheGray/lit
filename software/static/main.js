@@ -15,9 +15,9 @@ function getBasicGrid(header, main, footer) {
 function getMainTemplate(props) {
   const { title } = props;
 
-  return `
-    <h2>${title}</h2>
-  `;
+  const header = `<h2>${title}</h2>`;
+
+  return getBasicGrid(header, '', '');
 }
 
 function bootstrapApp(props) {
