@@ -2,7 +2,14 @@ const root = document.querySelector('div#app-root');
 
 root.innerHTML = bootstrapApp({ title: `It's Lit` });
 
-function bootstrapApp(props) {
+function getMainTemplate(props) {
   const { title } = props;
-  return title;
+
+  return `
+    <h2>${title}</h2>
+  `;
+}
+
+function bootstrapApp(props) {
+  return getMainTemplate(props);
 }
