@@ -10,12 +10,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0px;
+}
+
+div#app-root {
+  height: 100%;
+  width: 100%;
 }
 
 .basic-grid {
+  height: 100%;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 10% 1fr 10%;
+  grid-template-rows: 8% 1fr 6%;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
 }
