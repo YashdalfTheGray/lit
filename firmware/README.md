@@ -27,6 +27,13 @@ CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 - For printing, `x=0, y=4` actually represents the area of the screen where you can actually start seeing the text. `x=0, y=0` will cut out some of the text. The actual bounds of the screen are `[0,127]` in the x-axis and `[4, 68]` in the y-axis.
 - To change text on the screen, we just need to update the text on the label created from `label.Label` using `label_instance.text = "the new text"`. The `label` import is available from the `adafruit_display_text` library.
 
+### INA219
+
+- The `shunt_voltage` is the voltage differential between the + and - terminals on the board
+- The `bus_voltage` is the voltage differential between the - terminal and ground
+- _Technically_, the `current` and the `bus_voltage` numbers should multipled together should match the `power` number but that only happens when there is an actual load on the circuit.
+- Since we're using an external 5V 5A power supply, we expect the `bus_voltage` to read close to 5V all the time once it is hooked up.
+
 ## References
 
 - https://github.com/adafruit/PyCon2019

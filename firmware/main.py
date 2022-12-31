@@ -6,18 +6,7 @@ import terminalio
 
 from adafruit_display_text import label
 import adafruit_displayio_sh1107
-
-
-def clamp(x):
-    return max(0, min(x, 255))
-
-
-def tuple_to_hashcode(color_tuple):
-    return "#{0:02x}{1:02x}{2:02x}".format(
-        clamp(color_tuple[0]),
-        clamp(color_tuple[1]),
-        clamp(color_tuple[2])
-    )
+import adafruit_ina219
 
 
 def init_display(main_group):
@@ -32,9 +21,9 @@ def init_display(main_group):
 displayio.release_displays()
 # oled_reset = board.D9
 
-# Use for I2C
-i2c = board.I2C()  # uses board.SCL and board.SDA
+i2c = board.I2C()
 display_bus = displayio.I2CDisplay(i2c, device_address=0x3C)
+ina219_sensor = adafruit_ina219.INA219(i2c, addr=0x40)
 
 # SH1107 is vertically oriented 64x128
 WIDTH = 128
@@ -47,9 +36,16 @@ display = adafruit_displayio_sh1107.SH1107(
 splash = displayio.Group()
 display.show(splash)
 init_display(splash)
-color_hash_label = label.Label(
+
+voltage_label = label.Label(
     terminalio.FONT, text=" "*20, scale=1, color=0xFFFFFF, x=4, y=8)
-splash.append(color_hash_label)
+splash.append(voltage_label)
+current_label = label.Label(
+    terminalio.FONT, text=" "*20, scale=1, color=0xFFFFFF, x=4, y=20)
+splash.append(current_label)
+power_label = label.Label(
+    terminalio.FONT, text=" "*20, scale=1, color=0xFFFFFF, x=4, y=32)
+splash.append(power_label)
 
 pixels = neopixel.NeoPixel(board.NEOPIXEL, 1)
 
@@ -69,6 +65,8 @@ index = 0
 while True:
     current_color = predefined_colors[index]
     pixels.fill(current_color)
-    color_hash_label.text = f"Color: {tuple_to_hashcode(current_color)}"
+    voltage_label.text = "Voltage: {}V".format(ina219_sensor.bus_voltage)
+    current_label.text = "Current: {}mA".format(ina219_sensor.current)
+    power_label.text = "Power:   {}W".format(ina219_sensor.power)
     time.sleep(1)
     index = (index + 1) % predefined_colors_length
