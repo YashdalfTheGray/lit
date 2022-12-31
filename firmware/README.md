@@ -25,6 +25,7 @@ CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 
 - While printing text on the screen, `scale=1` (which is the default) represents characters that are 8 pixels tall. And this scales linearly, so `scale=2` is 16 pixels.
 - For printing, `x=0, y=4` actually represents the area of the screen where you can actually start seeing the text. `x=0, y=0` will cut out some of the text. The actual bounds of the screen are `[0,127]` in the x-axis and `[4, 68]` in the y-axis.
+- To change text on the screen, we just need to update the text on the label created from `label.Label` using `label_instance.text = "the new text"`. The `label` import is available from the `adafruit_display_text` library.
 
 ## References
 
