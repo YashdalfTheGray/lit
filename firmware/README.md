@@ -13,11 +13,18 @@ Docs - https://docs.circuitpython.org/en/latest/docs/index.html
 OfficialBundle - https://github.com/adafruit/Adafruit_CircuitPython_Bundle
 CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 
-### Copying libraries out of the archive
+## Copying libraries out of the archive
 
 ```sh
 ./firmware/copy-lib -d -a firmware/adafruit-circuitpython-bundle-8.x-mpy-20221216.zip -l ./firmware/libraries.json
 ```
+
+## Notes
+
+### Display
+
+- While printing text on the screen, `scale=1` (which is the default) represents characters that are 8 pixels tall. And this scales linearly, so `scale=2` is 16 pixels.
+- For printing, `x=0, y=4` actually represents the area of the screen where you can actually start seeing the text. `x=0, y=0` will cut out some of the text. The actual bounds of the screen are `[0,127]` in the x-axis and `[4, 68]` in the y-axis.
 
 ## References
 
