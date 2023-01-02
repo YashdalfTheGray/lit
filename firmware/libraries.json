@@ -4,5 +4,6 @@
   "adafruit_ina219.mpy",
   "adafruit_displayio_sh1107.mpy",
   "adafruit_register",
+  "adafruit_requests.mpy",
   "neopixel.mpy"
 ]
