@@ -3,10 +3,25 @@ import neopixel
 import board
 import displayio
 import terminalio
+import ssl
+import wifi
+import socketpool
 
 from adafruit_display_text import label
 import adafruit_displayio_sh1107
 import adafruit_ina219
+import adafruit_requests
+
+
+def wifi_connect():
+    try:
+        from secrets import secrets  # type: ignore
+    except ImportError:
+        print("WiFi secrets are kept in secrets.py, please add them there!")
+        raise
+
+    wifi.radio.connect(secrets["ssid"], secrets["password"])
+    print("My IP address is", wifi.radio.ipv4_address)
 
 
 def init_display(main_group):
@@ -28,11 +43,15 @@ ina219_sensor = adafruit_ina219.INA219(i2c, addr=0x40)
 # SH1107 is vertically oriented 64x128
 WIDTH = 128
 HEIGHT = 64
+JSON_STARS_URL = "https://api.github.com/repos/adafruit/circuitpython"
+
+wifi_connect()
+pool = socketpool.SocketPool(wifi.radio)
+requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
 display = adafruit_displayio_sh1107.SH1107(
     display_bus, width=WIDTH, height=HEIGHT, rotation=0
 )
-
 splash = displayio.Group()
 display.show(splash)
 init_display(splash)
@@ -61,6 +80,12 @@ predefined_colors = [
 ]
 predefined_colors_length = len(predefined_colors)
 index = 0
+
+print("Fetching and parsing json from", JSON_STARS_URL)
+response = requests.get(JSON_STARS_URL)
+print("-" * 40)
+print("CircuitPython GitHub Stars", response.json()["stargazers_count"])
+print("-" * 40)
 
 while True:
     current_color = predefined_colors[index]
