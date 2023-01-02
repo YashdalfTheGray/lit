@@ -33,6 +33,9 @@ CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 - The `bus_voltage` is the voltage differential between the - terminal and ground
 - _Technically_, the `current` and the `bus_voltage` numbers should multipled together should match the `power` number but that only happens when there is an actual load on the circuit.
 - Since we're using an external 5V 5A power supply, we expect the `bus_voltage` to read close to 5V all the time once it is hooked up.
+- Learning that we might need the INA260 instead of the INA219 to do the current/voltage measurement since the INA219 featherwing comes with a 0.1 ohm current sense resistor which makes the measurable current range +/-3.2A.
+- With the loss of some precision, a current range of +/-32A can be achieved but the 0.1 ohm current sense resistor needs to be replaced with a 0.01 ohm resistor.
+- The INA260 comes with a 0.02 ohm current sense resistor which can measure up to 15A of current on the high side.
 
 ### Wifi
 
@@ -51,3 +54,4 @@ CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 - https://www.adafruit.com/product/3650
 - https://learn.adafruit.com/adafruit-ina219-current-sensor-breakout
 - https://learn.adafruit.com/adafruit-128x64-oled-featherwing
+- https://learn.digilentinc.com/Documents/390
