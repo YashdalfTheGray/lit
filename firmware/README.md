@@ -34,6 +34,13 @@ CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 - _Technically_, the `current` and the `bus_voltage` numbers should multipled together should match the `power` number but that only happens when there is an actual load on the circuit.
 - Since we're using an external 5V 5A power supply, we expect the `bus_voltage` to read close to 5V all the time once it is hooked up.
 
+### Wifi
+
+- The SSID and password are stored in a file called `secrets.py` in the root of the `CIRCUITPY` drive.
+- There doesn't seem to be a way to create a server that listens for requests against it but you can make outbound requests using the `adafruit_requests` library
+- The `wifi.radio.ipv4_address` property can be used to get the IP address of the controller on the network
+- expect upto 10 seconds of latency when powering up with wifi, it takes some time to connect and establish all the proper sockets for outbound requests
+
 ## References
 
 - https://github.com/adafruit/PyCon2019
