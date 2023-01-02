@@ -22,6 +22,7 @@ def wifi_connect():
 
     wifi.radio.connect(secrets["ssid"], secrets["password"])
     print("My IP address is", wifi.radio.ipv4_address)
+    return secrets["ssid"]
 
 
 def init_display(main_group):
@@ -45,7 +46,7 @@ WIDTH = 128
 HEIGHT = 64
 JSON_STARS_URL = "https://api.github.com/repos/adafruit/circuitpython"
 
-wifi_connect()
+connected_ssid = wifi_connect()
 pool = socketpool.SocketPool(wifi.radio)
 requests = adafruit_requests.Session(pool, ssl.create_default_context())
 
@@ -65,6 +66,12 @@ splash.append(current_label)
 power_label = label.Label(
     terminalio.FONT, text=" "*20, scale=1, color=0xFFFFFF, x=4, y=32)
 splash.append(power_label)
+ssid_label = label.Label(
+    terminalio.FONT, text=" "*20, scale=1, color=0xFFFFFF, x=4, y=44)
+splash.append(ssid_label)
+ipv4_label = label.Label(
+    terminalio.FONT, text=" "*20, scale=1, color=0xFFFFFF, x=4, y=56)
+splash.append(ipv4_label)
 
 pixels = neopixel.NeoPixel(board.NEOPIXEL, 1)
 
@@ -92,6 +99,10 @@ while True:
     pixels.fill(current_color)
     voltage_label.text = "Voltage: {}V".format(ina219_sensor.bus_voltage)
     current_label.text = "Current: {}mA".format(ina219_sensor.current)
-    power_label.text = "Power:   {}W".format(ina219_sensor.power)
+    power_label.text = "Power: {}W".format(ina219_sensor.power)
+    if connected_ssid:
+        ssid_label.text = "SSID: {}".format(connected_ssid)
+        ipv4_label.text = "IP: {}".format(wifi.radio.ipv4_address)
+
     time.sleep(1)
     index = (index + 1) % predefined_colors_length
