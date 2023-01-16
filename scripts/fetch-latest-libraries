@@ -6,6 +6,8 @@ import re
 import requests
 import sys
 
+from typing import Callable
+
 help_message = """
 fetch-latest-libraries -o <download_location> -t <github_api_token> -c <circuitpython_version>
 
@@ -18,7 +20,9 @@ Options:
 
 
 def print_mini_help_and_exit():
-    print("fetch-latest-libraries -o <download_location> -t <github_api_token>")
+    print(
+        "fetch-latest-libraries -o <download_location> -t <github_api_token>"
+    )
     sys.exit(2)
 
 
@@ -32,6 +36,10 @@ def is_official_library(filename: str) -> bool:
 
 def is_community_library(filename: str) -> bool:
     return filename.startswith("circuitpython-community-bundle")
+
+
+def matches_version(filename: str, version: str) -> bool:
+    return version in filename
 
 
 def find_and_cleanup_old_libraries(folder: str) -> list[str]:
@@ -58,11 +66,53 @@ def get_release_json(owner: str, repo: str, auth_token: str):
     return response.json()
 
 
-def get_latest_official_library_url(auth_token: str, circuitpython_version: str):
-    res_json = get_release_json(
-        "adafruit", "Adafruit_CircuitPython_Bundle", auth_token)
-    print(res_json)
-    return circuitpython_version
+def get_latest_release_asset(
+    owner: str,
+    repo: str,
+    auth_token: str,
+    circuitpython_version: str,
+    matcher_func: Callable[[str], bool]
+):
+    res_json = get_release_json(owner, repo, auth_token)
+    res_assets = res_json["assets"]
+    relevant_assets = [
+        {"url": a["url"], "name": a["name"]} for a
+        in res_assets
+        if (
+            matcher_func(a["name"]) and
+            matches_version(a["name"], circuitpython_version)
+        )
+    ]
+
+    if len(relevant_assets) > 1:
+        print(
+            f"WARN: more than one asset found for CircuitPython version {circuitpython_version} in the latest release in {owner}/{repo}. Selecting the first one.")
+
+    return relevant_assets[0]
+
+
+def get_latest_official_library_url(
+    auth_token: str, circuitpython_version: str
+):
+    return get_latest_release_asset(
+        "adafruit",
+        "Adafruit_CircuitPython_Bundle",
+        auth_token,
+        circuitpython_version,
+        is_official_library
+    )["url"]
+
+
+def get_latest_community_library_url(
+    auth_token: str, circuitpython_version: str
+):
+    return get_latest_release_asset(
+        "adafruit",
+        "CircuitPython_Community_Bundle",
+        auth_token,
+        circuitpython_version,
+        is_community_library
+    )["url"]
 
 
 def main(argv):
@@ -74,7 +124,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(
             argv, "hro:t:c:", [
-                "help", "replace", "output-dir=", "github-token=", "circuitpython-version="
+                "help",
+                "replace",
+                "output-dir=",
+                "github-token=",
+                "circuitpython-version="
             ]
         )
     except getopt.GetoptError:
@@ -97,12 +151,24 @@ def main(argv):
                 raise TypeError(
                     f"Version string {arg} does not match valid release string spec. Please visit https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases to see version strings")
 
-    if len(output_dir) == 0 or len(github_token) == 0 or len(circuitpython_version) == 0:
+    if (
+        len(output_dir) == 0 or
+        len(github_token) == 0 or
+        len(circuitpython_version) == 0
+    ):
         print_mini_help_and_exit()
 
     abs_output_dir = os.path.abspath(output_dir)
+
     official_library_url = get_latest_official_library_url(
-        github_token, circuitpython_version)
+        github_token, circuitpython_version
+    )
+    community_library_url = get_latest_community_library_url(
+        github_token, circuitpython_version
+    )
+
+    print(official_library_url)
+    print(community_library_url)
 
     if replace:
         removed_files = find_and_cleanup_old_libraries(abs_output_dir)
