@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import getopt
+import os
+import re
 import sys
 
 help_message = """
@@ -16,6 +18,10 @@ Options:
 def print_mini_help_and_exit():
     print("fetch-latest-libraries -o <download_location> -t <github_api_token>")
     sys.exit(2)
+
+
+def is_version_valid(input_version):
+    return bool(re.match(r"^\d+\.x$", input_version))
 
 
 def main(argv):
@@ -41,10 +47,18 @@ def main(argv):
         elif opt in ("-t", "--github-token"):
             github_token = arg
         elif opt in ("-c", "--circuitpython-version"):
-            circuitpython_version = arg
+            if is_version_valid(arg):
+                circuitpython_version = arg
+            else:
+                raise TypeError(
+                    f"Version string {arg} does not match valid release string spec. Please visit https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases to see version strings")
 
     if len(output_dir) == 0 or len(github_token) == 0 or len(circuitpython_version) == 0:
         print_mini_help_and_exit()
+
+    print(os.path.abspath(output_dir))
+    print(github_token)
+    print(circuitpython_version)
 
 
 if __name__ == "__main__":
