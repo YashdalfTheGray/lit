@@ -13,12 +13,6 @@ Docs - https://docs.circuitpython.org/en/latest/docs/index.html
 OfficialBundle - https://github.com/adafruit/Adafruit_CircuitPython_Bundle
 CommunityBundle - https://github.com/adafruit/CircuitPython_Community_Bundle
 
-## Copying libraries out of the archive
-
-```sh
-./firmware/copy-lib -d -a firmware/adafruit-circuitpython-bundle-8.x-mpy-20221216.zip -l ./firmware/libraries.json
-```
-
 ## Notes
 
 ### Display

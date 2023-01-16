@@ -3,6 +3,7 @@
 import getopt
 import os
 import re
+import requests
 import sys
 
 help_message = """
