@@ -4,27 +4,33 @@ import getopt
 import sys
 
 help_message = """
-fetch-latest-libraries -o <download_location> -t <github_api_token>
+fetch-latest-libraries -o <download_location> -t <github_api_token> -c <circuitpython_version>
 
 Options:
-  - -o --output-dir\t\tthe directory to download the libraries from
-  - -t --github-token\t\tthe token to use to download the files, optional
+  - -o --output-dir\t\t\tthe directory to download the libraries from
+  - -t --github-token\t\t\tthe token to use to download the files
+  - -c --circuitpython-verison\t\tthe version of the libraries to download, for example 7.x or 8.x
 """
+
+
+def print_mini_help_and_exit():
+    print("fetch-latest-libraries -o <download_location> -t <github_api_token>")
+    sys.exit(2)
 
 
 def main(argv):
     output_dir = ""
     github_token = ""
+    circuitpython_version = ""
 
     try:
         opts, args = getopt.getopt(
-            argv, "ho:t:", [
-                "help", "output-dir=", "github-token="
+            argv, "ho:t:c:", [
+                "help", "output-dir=", "github-token=", "circuitpython-version="
             ]
         )
     except getopt.GetoptError:
-        print("fetch-latest-libraries -o <download_location> -t <github_api_token>")
-        sys.exit(2)
+        print_mini_help_and_exit()
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):
@@ -34,9 +40,11 @@ def main(argv):
             output_dir = arg
         elif opt in ("-t", "--github-token"):
             github_token = arg
+        elif opt in ("-c", "--circuitpython-version"):
+            circuitpython_version = arg
 
-    print(output_dir)
-    print(github_token)
+    if len(output_dir) == 0 or len(github_token) == 0 or len(circuitpython_version) == 0:
+        print_mini_help_and_exit()
 
 
 if __name__ == "__main__":
