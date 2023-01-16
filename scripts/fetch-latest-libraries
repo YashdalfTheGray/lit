@@ -6,7 +6,13 @@ import re
 import requests
 import sys
 
-from typing import Callable
+from typing import Callable, TypedDict
+
+
+class AssetSpec(TypedDict):
+    name: str
+    url: str
+
 
 help_message = """
 fetch-latest-libraries -o <download_location> -t <github_api_token> -c <circuitpython_version>
@@ -72,11 +78,11 @@ def get_latest_release_asset(
     auth_token: str,
     circuitpython_version: str,
     matcher_func: Callable[[str], bool]
-):
+) -> AssetSpec:
     res_json = get_release_json(owner, repo, auth_token)
     res_assets = res_json["assets"]
     relevant_assets = [
-        {"url": a["url"], "name": a["name"]} for a
+        AssetSpec(name=a["name"], url=a["url"]) for a
         in res_assets
         if (
             matcher_func(a["name"]) and
@@ -93,26 +99,26 @@ def get_latest_release_asset(
 
 def get_latest_official_library_url(
     auth_token: str, circuitpython_version: str
-):
+) -> AssetSpec:
     return get_latest_release_asset(
         "adafruit",
         "Adafruit_CircuitPython_Bundle",
         auth_token,
         circuitpython_version,
         is_official_library
-    )["url"]
+    )
 
 
 def get_latest_community_library_url(
     auth_token: str, circuitpython_version: str
-):
+) -> AssetSpec:
     return get_latest_release_asset(
         "adafruit",
         "CircuitPython_Community_Bundle",
         auth_token,
         circuitpython_version,
         is_community_library
-    )["url"]
+    )
 
 
 def main(argv):
@@ -160,15 +166,15 @@ def main(argv):
 
     abs_output_dir = os.path.abspath(output_dir)
 
-    official_library_url = get_latest_official_library_url(
+    official_library_asset = get_latest_official_library_url(
         github_token, circuitpython_version
     )
-    community_library_url = get_latest_community_library_url(
+    community_library_asset = get_latest_community_library_url(
         github_token, circuitpython_version
     )
 
-    print(official_library_url)
-    print(community_library_url)
+    print(official_library_asset)
+    print(community_library_asset)
 
     if replace:
         removed_files = find_and_cleanup_old_libraries(abs_output_dir)
