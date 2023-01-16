@@ -45,6 +45,26 @@ def find_and_cleanup_old_libraries(folder: str) -> list[str]:
     return filtered_list
 
 
+def get_release_json(owner: str, repo: str, auth_token: str):
+    response = requests.get(
+        f"https://api.github.com/repos/{owner}/{repo}/releases/latest",
+        {
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Authorization": f"Bearer {auth_token}"
+        }
+    )
+
+    return response.json()
+
+
+def get_latest_official_library_url(auth_token: str, circuitpython_version: str):
+    res_json = get_release_json(
+        "adafruit", "Adafruit_CircuitPython_Bundle", auth_token)
+    print(res_json)
+    return circuitpython_version
+
+
 def main(argv):
     output_dir = ""
     github_token = ""
@@ -81,9 +101,8 @@ def main(argv):
         print_mini_help_and_exit()
 
     abs_output_dir = os.path.abspath(output_dir)
-    print(abs_output_dir)
-    print(github_token)
-    print(circuitpython_version)
+    official_library_url = get_latest_official_library_url(
+        github_token, circuitpython_version)
 
     if replace:
         removed_files = find_and_cleanup_old_libraries(abs_output_dir)
