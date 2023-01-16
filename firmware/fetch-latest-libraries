@@ -9,6 +9,7 @@ help_message = """
 fetch-latest-libraries -o <download_location> -t <github_api_token> -c <circuitpython_version>
 
 Options:
+  - -r --replace\t\t\twhether to replace the old archives, if they exist in the directory, false by default
   - -o --output-dir\t\t\tthe directory to download the libraries from
   - -t --github-token\t\t\tthe token to use to download the files
   - -c --circuitpython-verison\t\tthe version of the libraries to download, for example 7.x or 8.x
@@ -20,19 +21,39 @@ def print_mini_help_and_exit():
     sys.exit(2)
 
 
-def is_version_valid(input_version):
+def is_version_valid(input_version: str) -> bool:
     return bool(re.match(r"^\d+\.x$", input_version))
+
+
+def is_official_library(filename: str) -> bool:
+    return filename.startswith("adafruit-circuitpython-bundle")
+
+
+def is_community_library(filename: str) -> bool:
+    return filename.startswith("circuitpython-community-bundle")
+
+
+def find_and_cleanup_old_libraries(folder: str) -> list[str]:
+    files_list = os.listdir(folder)
+    filtered_list = [f"{folder}{os.sep}{f}" for f in files_list if (
+        is_official_library(f) or is_community_library(f))]
+
+    for f in filtered_list:
+        os.remove(f)
+
+    return filtered_list
 
 
 def main(argv):
     output_dir = ""
     github_token = ""
     circuitpython_version = ""
+    replace = False
 
     try:
         opts, args = getopt.getopt(
-            argv, "ho:t:c:", [
-                "help", "output-dir=", "github-token=", "circuitpython-version="
+            argv, "hro:t:c:", [
+                "help", "replace", "output-dir=", "github-token=", "circuitpython-version="
             ]
         )
     except getopt.GetoptError:
@@ -42,6 +63,8 @@ def main(argv):
         if opt in ("-h", "--help"):
             print(help_message)
             sys.exit()
+        elif opt in ("-r", "--replace"):
+            replace = True
         elif opt in ("-o", "--output-dir"):
             output_dir = arg
         elif opt in ("-t", "--github-token"):
@@ -56,9 +79,19 @@ def main(argv):
     if len(output_dir) == 0 or len(github_token) == 0 or len(circuitpython_version) == 0:
         print_mini_help_and_exit()
 
-    print(os.path.abspath(output_dir))
+    abs_output_dir = os.path.abspath(output_dir)
+    print(abs_output_dir)
     print(github_token)
     print(circuitpython_version)
+
+    if replace:
+        removed_files = find_and_cleanup_old_libraries(abs_output_dir)
+
+        print("cleaned up the following files:")
+        for f in removed_files:
+            print(f" - {f}")
+
+        print("\n")
 
 
 if __name__ == "__main__":
