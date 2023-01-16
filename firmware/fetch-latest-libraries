@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+
+import getopt
+import sys
+
+help_message = """
+fetch-latest-libraries -o <download_location> -t <github_api_token>
+
+Options:
+  - -o --output-dir\t\tthe directory to download the libraries from
+  - -t --github-token\t\tthe token to use to download the files, optional
+"""
+
+
+def main(argv):
+    output_dir = ""
+    github_token = ""
+
+    try:
+        opts, args = getopt.getopt(
+            argv, "ho:t:", [
+                "help", "output-dir=", "github-token="
+            ]
+        )
+    except getopt.GetoptError:
+        print("fetch-latest-libraries -o <download_location> -t <github_api_token>")
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            print(help_message)
+            sys.exit()
+        elif opt in ("-o", "--output-dir"):
+            output_dir = arg
+        elif opt in ("-t", "--github-token"):
+            github_token = arg
+
+    print(output_dir)
+    print(github_token)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
