@@ -181,6 +181,7 @@ def main(argv):
 
     if replace:
         old_library_files = find_old_library_files(abs_output_dir)
+        old_library_files.sort()
 
     official_library_asset = get_latest_official_library_url(
         github_token, circuitpython_version
