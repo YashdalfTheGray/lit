@@ -82,7 +82,7 @@ def get_latest_release_asset(
     res_json = get_release_json(owner, repo, auth_token)
     res_assets = res_json["assets"]
     relevant_assets = [
-        AssetSpec(name=a["name"], url=a["url"]) for a
+        AssetSpec(name=a["name"], url=a["browser_download_url"]) for a
         in res_assets
         if (
             matcher_func(a["name"]) and
