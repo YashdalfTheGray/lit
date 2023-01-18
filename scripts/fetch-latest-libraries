@@ -121,6 +121,16 @@ def get_latest_community_library_url(
     )
 
 
+def download_asset(url: str, save_path: str):
+    response = requests.get(
+        url,
+        {"Accept": "application/octet-stream"},
+        allow_redirects=True
+    )
+
+    open(save_path, 'wb').write(response.content)
+
+
 def main(argv):
     output_dir = ""
     github_token = ""
@@ -173,8 +183,16 @@ def main(argv):
         github_token, circuitpython_version
     )
 
-    print(official_library_asset)
-    print(community_library_asset)
+    official_library_path = f"{abs_output_dir}{os.sep}{official_library_asset['name']}"
+    download_asset(official_library_asset["url"], official_library_path)
+
+    community_library_path = f"{abs_output_dir}{os.sep}{community_library_asset['name']}"
+    download_asset(community_library_asset["url"], community_library_path)
+
+    print("Downloaded the following files")
+    print(f" - {official_library_path}")
+    print(f" - {community_library_path}")
+    print("\n")
 
     if replace:
         removed_files = find_and_cleanup_old_libraries(abs_output_dir)
