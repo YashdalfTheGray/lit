@@ -121,10 +121,14 @@ def get_latest_community_library_url(
     )
 
 
-def download_asset(url: str, save_path: str):
+def download_asset(url: str, save_path: str, auth_token: str):
     response = requests.get(
         url,
-        {"Accept": "application/octet-stream"},
+        {
+            "Accept": "application/octet-stream",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Authorization": f"Bearer {auth_token}"
+        },
         allow_redirects=True
     )
 
@@ -184,10 +188,12 @@ def main(argv):
     )
 
     official_library_path = f"{abs_output_dir}{os.sep}{official_library_asset['name']}"
-    download_asset(official_library_asset["url"], official_library_path)
+    download_asset(
+        official_library_asset["url"], official_library_path, github_token)
 
     community_library_path = f"{abs_output_dir}{os.sep}{community_library_asset['name']}"
-    download_asset(community_library_asset["url"], community_library_path)
+    download_asset(
+        community_library_asset["url"], community_library_path, github_token)
 
     print("Downloaded the following files")
     print(f" - {official_library_path}")
