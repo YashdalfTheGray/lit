@@ -48,15 +48,13 @@ def matches_version(filename: str, version: str) -> bool:
     return version in filename
 
 
-def find_and_cleanup_old_libraries(folder: str) -> list[str]:
+def find_old_library_files(folder: str) -> list[str]:
     files_list = os.listdir(folder)
-    filtered_list = [f"{folder}{os.sep}{f}" for f in files_list if (
-        is_official_library(f) or is_community_library(f))]
-
-    for f in filtered_list:
-        os.remove(f)
-
-    return filtered_list
+    return [
+        f"{folder}{os.sep}{f}" for f
+        in files_list
+        if (is_official_library(f) or is_community_library(f))
+    ]
 
 
 def get_release_json(owner: str, repo: str, auth_token: str):
@@ -140,6 +138,7 @@ def main(argv):
     github_token = ""
     circuitpython_version = ""
     replace = False
+    old_library_files: list[str] = []
 
     try:
         opts, args = getopt.getopt(
@@ -180,6 +179,9 @@ def main(argv):
 
     abs_output_dir = os.path.abspath(output_dir)
 
+    if replace:
+        old_library_files = find_old_library_files(abs_output_dir)
+
     official_library_asset = get_latest_official_library_url(
         github_token, circuitpython_version
     )
@@ -201,10 +203,11 @@ def main(argv):
     print("\n")
 
     if replace:
-        removed_files = find_and_cleanup_old_libraries(abs_output_dir)
+        for f in old_library_files:
+            os.remove(f)
 
         print("cleaned up the following files:")
-        for f in removed_files:
+        for f in old_library_files:
             print(f" - {f}")
 
         print("\n")
