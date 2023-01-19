@@ -179,9 +179,8 @@ def main(argv):
 
     abs_output_dir = os.path.abspath(output_dir)
 
-    if replace:
-        old_library_files = find_old_library_files(abs_output_dir)
-        old_library_files.sort()
+    old_library_files = find_old_library_files(abs_output_dir)
+    old_library_files.sort()
 
     official_library_asset = get_latest_official_library_url(
         github_token, circuitpython_version
@@ -190,17 +189,30 @@ def main(argv):
         github_token, circuitpython_version
     )
 
-    official_library_path = f"{abs_output_dir}{os.sep}{official_library_asset['name']}"
-    download_asset(
-        official_library_asset["url"], official_library_path, github_token)
+    downloaded_files = []
 
-    community_library_path = f"{abs_output_dir}{os.sep}{community_library_asset['name']}"
-    download_asset(
-        community_library_asset["url"], community_library_path, github_token)
+    if not official_library_asset["name"] in old_library_files:
+        official_library_path = f"{abs_output_dir}{os.sep}{official_library_asset['name']}"
+        download_asset(
+            official_library_asset["url"],
+            official_library_path,
+            github_token
+        )
+        downloaded_files.append(official_library_path)
+
+    if not community_library_asset["name"] in old_library_files:
+        community_library_path = f"{abs_output_dir}{os.sep}{community_library_asset['name']}"
+        download_asset(
+            community_library_asset["url"],
+            community_library_path,
+            github_token
+        )
+        downloaded_files.append(community_library_path)
 
     print("Downloaded the following files")
-    print(f" - {official_library_path}")
-    print(f" - {community_library_path}")
+    for f in downloaded_files:
+        print(f" - {f}")
+
     print("\n")
 
     if replace:
