@@ -51,7 +51,7 @@ def matches_version(filename: str, version: str) -> bool:
 def find_old_library_files(folder: str) -> list[str]:
     files_list = os.listdir(folder)
     return [
-        f"{folder}{os.sep}{f}" for f
+        f for f
         in files_list
         if (is_official_library(f) or is_community_library(f))
     ]
@@ -205,7 +205,7 @@ def main(argv):
 
     if replace:
         for f in old_library_files:
-            os.remove(f)
+            os.remove(f"{abs_output_dir}{os.sep}{f}")
 
         print("cleaned up the following files:")
         for f in old_library_files:
