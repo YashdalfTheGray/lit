@@ -134,15 +134,10 @@ def download_asset(url: str, save_path: str, auth_token: str):
 
 
 def base_library_name(full_name: str) -> str:
-    print("-".join(full_name.split("-")[0:3]))
     return "-".join(full_name.split("-")[0:3])
 
 
 def includes_string_prefix_match(to_match: str, coll: list[str]) -> bool:
-    print(coll)
-    print([
-        e.startswith(base_library_name(to_match)) for e in coll
-    ])
     return True in [
         os.path.basename(e).startswith(base_library_name(to_match)) for e
         in coll
@@ -215,6 +210,11 @@ def main(argv):
             github_token
         )
         downloaded_files.append(official_library_path)
+        print(
+            f"Got new official library {official_library_asset['name']}"
+        )
+    else:
+        print("Latest official library already exists locally")
 
     if not community_library_asset["name"] in old_library_files:
         community_library_path = f"{abs_output_dir}{os.sep}{community_library_asset['name']}"
@@ -224,12 +224,11 @@ def main(argv):
             github_token
         )
         downloaded_files.append(community_library_path)
-
-    print("Downloaded the following files")
-    for f in downloaded_files:
-        print(f" - {f}")
-
-    print("\n")
+        print(
+            f"Got new community library {community_library_asset['name']}"
+        )
+    else:
+        print("Latest community library already exists locally")
 
     if replace:
         files_to_delete = [
@@ -240,11 +239,12 @@ def main(argv):
         for f in files_to_delete:
             os.remove(f"{abs_output_dir}{os.sep}{f}")
 
-        print("cleaned up the following files:")
-        for f in files_to_delete:
-            print(f" - {abs_output_dir}{os.sep}{f}")
+        if len(files_to_delete) > 0:
+            print("cleaned up the following files:")
+            for f in files_to_delete:
+                print(f" - {abs_output_dir}{os.sep}{f}")
 
-        print("\n")
+            print("\n")
 
 
 if __name__ == "__main__":
