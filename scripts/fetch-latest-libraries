@@ -133,6 +133,22 @@ def download_asset(url: str, save_path: str, auth_token: str):
     open(save_path, 'wb').write(response.content)
 
 
+def base_library_name(full_name: str) -> str:
+    print("-".join(full_name.split("-")[0:3]))
+    return "-".join(full_name.split("-")[0:3])
+
+
+def includes_string_prefix_match(to_match: str, coll: list[str]) -> bool:
+    print(coll)
+    print([
+        e.startswith(base_library_name(to_match)) for e in coll
+    ])
+    return True in [
+        os.path.basename(e).startswith(base_library_name(to_match)) for e
+        in coll
+    ]
+
+
 def main(argv):
     output_dir = ""
     github_token = ""
@@ -189,7 +205,7 @@ def main(argv):
         github_token, circuitpython_version
     )
 
-    downloaded_files = []
+    downloaded_files: list[str] = []
 
     if not official_library_asset["name"] in old_library_files:
         official_library_path = f"{abs_output_dir}{os.sep}{official_library_asset['name']}"
@@ -216,12 +232,17 @@ def main(argv):
     print("\n")
 
     if replace:
-        for f in old_library_files:
+        files_to_delete = [
+            f for f
+            in old_library_files
+            if includes_string_prefix_match(f, downloaded_files)
+        ]
+        for f in files_to_delete:
             os.remove(f"{abs_output_dir}{os.sep}{f}")
 
         print("cleaned up the following files:")
-        for f in old_library_files:
-            print(f" - {f}")
+        for f in files_to_delete:
+            print(f" - {abs_output_dir}{os.sep}{f}")
 
         print("\n")
 
